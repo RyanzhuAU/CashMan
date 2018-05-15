@@ -6,12 +6,9 @@ import com.suncorp.cashman.domain.CashSupply;
 import com.suncorp.cashman.domain.CashType;
 import com.suncorp.cashman.domain.TransactionLog;
 import com.suncorp.cashman.domain.TransactionLogDetail;
-import com.suncorp.cashman.exception.CashSupplyException;
-import com.suncorp.cashman.repository.CashSupplyRepository;
 import com.suncorp.cashman.repository.CashTypeRepository;
 import com.suncorp.cashman.repository.TransactionLogDetailRepository;
 import com.suncorp.cashman.repository.TransactionLogRepository;
-import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -83,7 +80,7 @@ public class TransactionLogServiceTest {
         assertThat(detailList.size(), is(3));
 
         detailList.forEach(logDetail -> {
-            assertThat(logDetail.getTransactionLog().getTransactionId(), is(transactionLog.getTransactionId()));
+            assertThat(logDetail.getTransactionLog().getTransactionLogId(), is(transactionLog.getTransactionLogId()));
 
             if (logDetail.getCashValue() == 100) {
                 assertThat(logDetail.getQuantity(), is(5));

@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class TransactionLog {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
-    private long transactionId;
+    private long transactionLogId;
 
     private String bsb;
 

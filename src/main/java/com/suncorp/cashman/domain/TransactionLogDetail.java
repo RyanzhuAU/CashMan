@@ -17,7 +17,7 @@ public class TransactionLogDetail {
     private long transactionDetailId;
 
     @ManyToOne
-    @JoinColumn(name="transaction_id")
+    @JoinColumn(name="transaction_log_id")
     private TransactionLog transactionLog;
 
     private String cashDesc;
