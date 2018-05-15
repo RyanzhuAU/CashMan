@@ -1,6 +1,6 @@
-DROP SCHEMA IF EXISTS suncorp_test;
-CREATE SCHEMA `suncorp_test` ;
-USE suncorp_test;
+-- DROP SCHEMA IF EXISTS suncorp_test;
+-- CREATE SCHEMA `suncorp_test` ;
+-- USE suncorp_test;
 
 --
 -- Table structure for table `cash_type`

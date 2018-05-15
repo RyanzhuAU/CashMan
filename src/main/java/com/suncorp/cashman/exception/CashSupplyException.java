@@ -51,14 +51,14 @@ public class CashSupplyException extends Exception {
     }
 
     private static String createMessage(int amountRequired) {
-        return "Sorry, this ATM cannot supply the amountRequired $" + amountRequired + " with current stock. Please try again later.";
+        return "Sorry, this ATM cannot supply the amount required $" + amountRequired + " with current stock. Please try again later.";
     }
 
     private static String createMessage(int amountRequired, int amountSupplied, boolean overLimit) {
         if (overLimit) {
             return "Sorry, the amount $" + amountRequired + " is over your withdraw limitation. The amount you can withdraw is $" + amountSupplied + " today.";
         } else {
-            return "Sorry, this ATM cannot supply the amountRequired $" + amountRequired + " with current stock. " +
+            return "Sorry, this ATM cannot supply the amount required $" + amountRequired + " with current stock. " +
                     "The closest amount that can be supplied is $" + amountSupplied + ". Please try again later.";
         }
     }
