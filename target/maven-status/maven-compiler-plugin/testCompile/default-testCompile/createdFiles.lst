@@ -1,0 +1,4 @@
+com\suncorp\cashman\controller\NoteDispenseControllerTest.class
+com\suncorp\cashman\service\NoteDispenseServiceTest.class
+com\suncorp\cashman\H2JpaConfig.class
+com\suncorp\cashman\controller\TaskControllerTest.class
