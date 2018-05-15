@@ -47,6 +47,8 @@ public class TransactionLogServiceTest {
     @Before
     public void setup() {
         transactionLogService = new TransactionLogServiceImpl(transactionLogRepository, transactionLogDetailRepository);
+        this.transactionLogDetailRepository.deleteAllInBatch();
+        this.transactionLogRepository.deleteAllInBatch();
     }
 
     @Test
@@ -84,11 +86,11 @@ public class TransactionLogServiceTest {
             assertThat(logDetail.getTransactionLog().getTransactionId(), is(transactionLog.getTransactionId()));
 
             if (logDetail.getCashValue() == 100) {
-                assertThat(logDetail.getQuality(), is(5));
+                assertThat(logDetail.getQuantity(), is(5));
             } else if (logDetail.getCashValue() == 50) {
-                assertThat(logDetail.getQuality(), is(6));
+                assertThat(logDetail.getQuantity(), is(6));
             } else if (logDetail.getCashValue() == 20) {
-                assertThat(logDetail.getQuality(), is(7));
+                assertThat(logDetail.getQuantity(), is(7));
             }
         });
     }

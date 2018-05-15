@@ -44,7 +44,7 @@ public class TransactionLogServiceImpl implements TransactionLogService {
             TransactionLogDetail transactionLogDetail = new TransactionLogDetail();
             transactionLogDetail.setCashDesc(cashType.getCashDesc());
             transactionLogDetail.setCashValue(cashType.getCashValue());
-            transactionLogDetail.setQuality(cashSupply.getCashQuantity());
+            transactionLogDetail.setQuantity(cashSupply.getCashQuantity());
             transactionLogDetail.setTransactionLog(transactionLog);
 
             this.transactionLogDetailRepository.save(transactionLogDetail);

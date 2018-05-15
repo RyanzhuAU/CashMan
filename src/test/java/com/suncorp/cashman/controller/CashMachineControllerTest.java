@@ -12,6 +12,7 @@ import com.suncorp.cashman.repository.TransactionLogDetailRepository;
 import com.suncorp.cashman.representation.CashSupplyRep;
 import com.suncorp.cashman.service.CashService;
 import com.suncorp.cashman.service.CashServiceImpl;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,7 +23,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -56,7 +59,7 @@ public class CashMachineControllerTest {
     private CashService cashService;
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
         cashService = new CashServiceImpl(this.cashSupplyRepository, this.cashTypeRepository);
 
         transactionLogDetailRepository.deleteAllInBatch();
@@ -86,14 +89,15 @@ public class CashMachineControllerTest {
 
     @Test
     public void dispenseCashControllerTest() throws Exception {
-        // test normal scenario
+        // test the scenario - withdraw with one cash supply.
         MvcResult result = this.mockMvc.perform(get("/cashMachine/dispenseCash/100"))
-                            .andExpect(status().isOk())
-                            .andReturn();
+                .andExpect(status().isOk())
+                .andReturn();
 
         String content = result.getResponse().getContentAsString();
 
-        List<CashSupplyRep> cashSupplyRepList = objectMapper.readValue(content, new TypeReference<List<CashSupplyRep>>(){});
+        List<CashSupplyRep> cashSupplyRepList = objectMapper.readValue(content, new TypeReference<List<CashSupplyRep>>() {
+        });
 
         assertThat(cashSupplyRepList.size(), is(1));
 
@@ -102,7 +106,49 @@ public class CashMachineControllerTest {
         assertThat(cashSupplyRep.getCashQuantity(), is(1));
         assertThat(cashSupplyRep.getCashValue(), is(100));
 
-        //test the over daily withdraw limitation scenario
+        // test the scenario - need to withdraw with different note/coin
+        result = this.mockMvc.perform(get("/cashMachine/dispenseCash/90"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        content = result.getResponse().getContentAsString();
+
+        cashSupplyRepList = objectMapper.readValue(content, new TypeReference<List<CashSupplyRep>>() {
+        });
+
+        assertThat(cashSupplyRepList.size(), is(2));
+
+        cashSupplyRepList.forEach(cashRep -> {
+            if (cashRep.getCashValue() == 50) {
+                assertThat(cashRep.getCashDesc(), is("$50"));
+                assertThat(cashRep.getCashQuantity(), is(1));
+                assertThat(cashRep.getCashValue(), is(50));
+            } else if (cashRep.getCashValue() == 20) {
+                assertThat(cashRep.getCashDesc(), is("$20"));
+                assertThat(cashRep.getCashQuantity(), is(2));
+                assertThat(cashRep.getCashValue(), is(20));
+            }
+        });
+
+        // test the scenario - the cash stock cannot meet the required cash amount
+        result = this.mockMvc.perform(get("/cashMachine/dispenseCash/55"))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        content = result.getResponse().getContentAsString();
+        assertThat(content, is("Sorry, this ATM cannot supply the amountRequired $55 with current stock. " +
+                "The closest amount that can be supplied is $50. Please try again later."));
+
+        // test the scenario - cannot withdraw with existing cash supply
+        result = this.mockMvc.perform(get("/cashMachine/dispenseCash/400"))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        content = result.getResponse().getContentAsString();
+        assertThat(content, is("Sorry, this ATM cannot supply the amountRequired $400 with current stock. " +
+                "The closest amount that can be supplied is $210. Please try again later."));
+
+        // test the over daily withdraw limitation scenario
         int withdrawLimitation = cashService.getAccountCashWithdrawLimitation();
         result = this.mockMvc.perform(get("/cashMachine/dispenseCash/" + (withdrawLimitation + 1)))
                 .andExpect(status().isBadRequest())
@@ -111,40 +157,38 @@ public class CashMachineControllerTest {
         content = result.getResponse().getContentAsString();
         assertThat(content, is("Sorry, the amount $" + (withdrawLimitation + 1) + " is over your withdraw limitation. The amount you can withdraw is $" + withdrawLimitation + " today."));
 
-        // test the cash out of stock scenario
-        result = this.mockMvc.perform(get("/cashMachine/dispenseCash/350"))
-                .andExpect(status().isBadRequest())
-                .andReturn();
+    }
 
-        content = result.getResponse().getContentAsString();
-        assertThat(content, is("Sorry, this ATM cannot supply the amountRequired $350 with current stock. The closest amount that can be supplied is $300. Please try again later."));
-
+    @Test
+    public void getCashStockTest() throws Exception {
         // test the check cash stock endpoint
-        result = this.mockMvc.perform(get("/cashMachine/getCashStock"))
+        MvcResult result = this.mockMvc.perform(get("/cashMachine/getCashStock"))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        content = result.getResponse().getContentAsString();
-        cashSupplyRepList = objectMapper.readValue(content, new TypeReference<List<CashSupplyRep>>(){});
+        String content = result.getResponse().getContentAsString();
+        List<CashSupplyRep> cashSupplyRepList = objectMapper.readValue(content, new TypeReference<List<CashSupplyRep>>() {});
 
-        cashSupplyRepList.forEach(cashRep -> {
-            if (cashRep.getCashValue() == 100) {
-                assertThat(cashRep.getCashQuantity(), is(1));
-            } else if (cashRep.getCashValue() == 50) {
-                assertThat(cashRep.getCashQuantity(), is(2));
-            } else if (cashRep.getCashValue() == 20) {
-                assertThat(cashRep.getCashQuantity(), is(3));
-            } else if (cashRep.getCashValue() == 10) {
-                assertThat(cashRep.getCashQuantity(), is(4));
-            }
+        List<CashSupply> cashSupplyListFromDb = cashSupplyRepository.findAll();
+        Map<Integer, Integer> cashSupplyMap = new HashMap<>();
+        cashSupplyListFromDb.forEach(cashSupply -> {
+            cashSupplyMap.put(cashSupply.getCashType().getCashValue(), cashSupply.getCashQuantity());
         });
 
+        cashSupplyRepList.forEach(cashSupply -> {
+            assertThat(cashSupply.getCashQuantity(), is(cashSupplyMap.get(cashSupply.getCashValue())));
+        });
+    }
+
+    @Test
+    public void initializeEndpointTest() throws Exception {
         // test the initialization endpoint
         this.mockMvc.perform(post("/cashMachine/initialize"))
                 .andExpect(status().isOk())
                 .andReturn();
 
         List<CashSupply> cashSupplyList = cashService.getCurrentCashSupplies();
+
         cashSupplyList.forEach(cashSupply -> {
             if (cashSupply.getCashType().getCashValue() == 100) {
                 assertThat(cashSupply.getCashQuantity(), is(10));

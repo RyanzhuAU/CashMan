@@ -13,9 +13,9 @@ import java.util.Map;
 
 public interface CashService {
 
-    void initializeCashMachine() throws Exception;
+    void initializeCashMachine();
 
-    List<CashSupply> getCurrentCashSupplies() throws Exception;
+    List<CashSupply> getCurrentCashSupplies();
 
     Map<CashType, CashSupply> dispenseCash(Integer cashAmount) throws CashSupplyException;
 

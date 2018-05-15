@@ -35,7 +35,10 @@ public class CashServiceImpl implements CashService {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public void initializeCashMachine() throws Exception {
+    /**
+     * Used to initialize the cash machine with the given cash supplies.
+     */
+    public void initializeCashMachine() {
         Map<Integer, Integer> initializedCashSupplies = getDummyCashSuppliesForInitialize();
 
         cashSupplyRepository.deleteAllInBatch();
@@ -50,7 +53,12 @@ public class CashServiceImpl implements CashService {
         });
     }
 
-    public List<CashSupply> getCurrentCashSupplies() throws Exception {
+    /**
+     * Used to get the current stock of cash supplies.
+     *
+     * @return the list of current cash supplies.
+     */
+    public List<CashSupply> getCurrentCashSupplies() {
         List<CashSupply> cashSupplyList = cashSupplyRepository.findAllByOrderByCashAmountDesc();
 
         return cashSupplyList;
@@ -80,6 +88,24 @@ public class CashServiceImpl implements CashService {
         return resultMap;
     }
 
+    /**
+     * Use the recursive method to dispense the cash.
+     * This algorithm works as below:
+     * - first try to supply the full amount with the highest cash supply only.
+     * - if successful, then just return this cash supply.
+     * - if not successful, then see if it could get one highest cash
+     * - if possible withdraw one highest cash, update the withdraw cash amount and call this method again.
+     * - if not possible, remove the highest cash supply from cashSupplyList, and call this method again.
+     *
+     * @param cashAmount     Required dispense cash amount
+     * @param cashSupplyList Cash supplies ordered by cash value desc.
+     * @param dispenseResult Used to store the dispense cash result.
+     * @return the left cash amount
+     * @throws CashSupplyException handles three different scenario
+     *                             - There is no cash in the machine
+     *                             - The existing cash supply could not meet the required cash amount
+     *                             - The required cash amount is over the daily withdraw limitation
+     */
     private int withdraw(Integer cashAmount, List<CashSupply> cashSupplyList, Map<CashType, CashSupply> dispenseResult) throws CashSupplyException {
 
         if (cashAmount == 0) {
@@ -122,7 +148,12 @@ public class CashServiceImpl implements CashService {
 
     }
 
-    private void checkCashStock(List<CashSupply> cashSupplyList) throws CashSupplyException {
+    /**
+     * Check the cash stock after dispensing the cash. If the stock is lower than the specific cash supply standard, then send the notification via email/text or call another endpoint
+     *
+     * @param cashSupplyList The list of the cash supplies after dispensing the cash.
+     */
+    private void checkCashStock(List<CashSupply> cashSupplyList) {
         Map<Integer, Integer> cashLowStockStandard = getDummyCashLowStockStandard();
         List<CashSupply> lowStockCashList = new ArrayList<>();
 
@@ -137,12 +168,25 @@ public class CashServiceImpl implements CashService {
 
     }
 
+    /**
+     * It should get the bank withdraw limitation from somewhere else
+     *
+     * @return The current bank account limitation
+     */
     //TODO need to get this limitation from somewhere else
     public int getAccountCashWithdrawLimitation() {
         return 1000;
     }
 
-    private boolean supplyWithOneCash(Integer amount, CashSupply cashSupply, Map<CashType, CashSupply> dispenseResult) throws CashSupplyException {
+    /**
+     * Try to supply with the specific cash supply
+     *
+     * @param amount         The withdraw cash amount
+     * @param cashSupply     The specific cash supply
+     * @param dispenseResult The result map which is used to store the dispense cash supply
+     * @return
+     */
+    private boolean supplyWithOneCash(Integer amount, CashSupply cashSupply, Map<CashType, CashSupply> dispenseResult) {
         CashType cashType = cashSupply.getCashType();
         Integer cashValue = cashType.getCashValue();
 
@@ -159,6 +203,13 @@ public class CashServiceImpl implements CashService {
         }
     }
 
+    /**
+     * Add the cash supply to the dispense result map.
+     *
+     * @param dispenseCashType     The selected cash type.
+     * @param cashWithdrawQuantity The cash withdraw quantity for the selected cash type
+     * @param dispenseResult       The result map which is used to store the dispense cash supply
+     */
     private void addDispenseCashSupply(CashType dispenseCashType, Integer cashWithdrawQuantity, Map<CashType, CashSupply> dispenseResult) {
         if (dispenseResult.containsKey(dispenseCashType)) {
             CashSupply dispenseCashSupply = dispenseResult.get(dispenseCashType);
@@ -169,7 +220,11 @@ public class CashServiceImpl implements CashService {
         }
     }
 
-    //TODO Should get this initialized cash supplies somewhere.
+    /**
+     * It should get the initialization cash supplies from somewhere else. Now just use the dummy map.
+     *
+     * @return A map of the initialized cash supplies.
+     */
     private Map<Integer, Integer> getDummyCashSuppliesForInitialize() {
         Map<Integer, Integer> dummyCashSupplies = new HashMap<>();
 
@@ -184,9 +239,13 @@ public class CashServiceImpl implements CashService {
         return dummyCashSupplies;
     }
 
-    //TODO Should get this low stock standard setting somewhere.
+    /**
+     * It should get the low stock standard setting somewhere.
+     *
+     * @return A map of the standard of the low stock cash supplies
+     */
     private Map<Integer, Integer> getDummyCashLowStockStandard() {
-        Map<Integer, Integer> dummyCashLowSupplyStandard= new HashMap<>();
+        Map<Integer, Integer> dummyCashLowSupplyStandard = new HashMap<>();
 
         dummyCashLowSupplyStandard.put(100, 2);
         dummyCashLowSupplyStandard.put(50, 3);

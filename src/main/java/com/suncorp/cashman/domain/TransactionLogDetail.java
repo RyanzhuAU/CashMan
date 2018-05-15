@@ -24,7 +24,7 @@ public class TransactionLogDetail {
 
     private Integer cashValue;
 
-    private Integer quality;
+    private Integer quantity;
 
     public TransactionLogDetail() {
 

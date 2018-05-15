@@ -1,4 +1,7 @@
-com\suncorp\cashman\controller\NoteDispenseControllerTest.class
-com\suncorp\cashman\service\NoteDispenseServiceTest.class
+com\suncorp\cashman\service\CashServiceTest.class
+com\suncorp\cashman\service\TransactionLogServiceTest.class
 com\suncorp\cashman\H2JpaConfig.class
-com\suncorp\cashman\controller\TaskControllerTest.class
+com\suncorp\cashman\controller\CashMachineControllerTest$3.class
+com\suncorp\cashman\controller\CashMachineControllerTest$1.class
+com\suncorp\cashman\controller\CashMachineControllerTest.class
+com\suncorp\cashman\controller\CashMachineControllerTest$2.class
