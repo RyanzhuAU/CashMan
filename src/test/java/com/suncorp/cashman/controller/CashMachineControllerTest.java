@@ -136,7 +136,7 @@ public class CashMachineControllerTest {
                 .andReturn();
 
         content = result.getResponse().getContentAsString();
-        assertThat(content, is("Sorry, this ATM cannot supply the amountRequired $55 with current stock. " +
+        assertThat(content, is("Sorry, this ATM cannot supply the amount required $55 with current stock. " +
                 "The closest amount that can be supplied is $50. Please try again later."));
 
         // test the scenario - cannot withdraw with existing cash supply
@@ -145,7 +145,7 @@ public class CashMachineControllerTest {
                 .andReturn();
 
         content = result.getResponse().getContentAsString();
-        assertThat(content, is("Sorry, this ATM cannot supply the amountRequired $400 with current stock. " +
+        assertThat(content, is("Sorry, this ATM cannot supply the amount required $400 with current stock. " +
                 "The closest amount that can be supplied is $210. Please try again later."));
 
         // test the over daily withdraw limitation scenario

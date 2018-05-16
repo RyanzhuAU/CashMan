@@ -115,7 +115,7 @@ public class CashServiceTest {
 
             assertThat(amountRequired, is(200));
             assertThat(amountSupplied, is(190));
-            assertThat(e.getMessage(), is("Sorry, this ATM cannot supply the amountRequired $" + amountRequired + " with current stock. " +
+            assertThat(e.getMessage(), is("Sorry, this ATM cannot supply the amount required $" + amountRequired + " with current stock. " +
                     "The closest amount that can be supplied is $" + amountSupplied + ". Please try again later."));
         }
 
@@ -128,7 +128,7 @@ public class CashServiceTest {
 
             assertThat(amountRequired, is(25));
             assertThat(amountSupplied, is(20));
-            assertThat(e.getMessage(), is("Sorry, this ATM cannot supply the amountRequired $" + amountRequired + " with current stock. " +
+            assertThat(e.getMessage(), is("Sorry, this ATM cannot supply the amount required $" + amountRequired + " with current stock. " +
                     "The closest amount that can be supplied is $" + amountSupplied + ". Please try again later."));
         }
 
