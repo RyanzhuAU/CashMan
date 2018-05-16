@@ -49,7 +49,7 @@ public class TransactionLogServiceTest {
     }
 
     @Test
-    public void saveTransactionTest() throws Exception {
+    public void saveTransactionTest() {
         // test save transaction log and log detail.
         Map<CashType, CashSupply> dispenseCashMap = new HashMap<>();
 
